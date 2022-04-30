@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/JM/Python_Projects/04%20MLFlow/Wine/mlruns/0/8f1eb3192efd4a55ba73ccc57e94e192/artifacts
+end_time: 1651155364007
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+name: ''
+run_id: 8f1eb3192efd4a55ba73ccc57e94e192
+run_uuid: 8f1eb3192efd4a55ba73ccc57e94e192
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1651155341024
+status: 3
+tags: []
+user_id: 029492838
