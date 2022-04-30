@@ -1,6 +1,7 @@
 # Example of using mlflow logged model to score 
 
 import mlflow
+# First select one of the runs
 logged_model = 'runs:/6eb6df92b60e422c8fbc6b89f4425a66/model'
 
 # Load model as a PyFuncModel.
