@@ -1,8 +1,10 @@
+
 # The data set used in this example is from http://archive.ics.uci.edu/ml/datasets/Wine+Quality
 # P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis.
 # Modeling wine preferences by data mining from physicochemical properties. In Decision Support Systems, Elsevier, 47(4):547-553, 2009.
-# 
-# pip install mlflow
+#
+# Please notice!!!
+# Launch MLflow UI before executing this script
 
 import os
 import warnings
@@ -22,6 +24,25 @@ import logging
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
+def get_or_create_experiment(experiment_name):
+    """
+    Retrieve the ID of an existing MLflow experiment or create a new one if it doesn't exist.
+
+    This function checks if an experiment with the given name exists within MLflow.
+    If it does, the function returns its ID. If not, it creates a new experiment
+    with the provided name and returns its ID.
+
+    Parameters:
+    - experiment_name (str): Name of the MLflow experiment.
+
+    Returns:
+    - str: ID of the existing or newly created MLflow experiment.
+    """
+
+    if experiment := mlflow.get_experiment_by_name(experiment_name):
+        return experiment.experiment_id
+    else:
+        return mlflow.create_experiment(experiment_name)
 
 def eval_metrics(actual, pred):
     rmse = np.sqrt(mean_squared_error(actual, pred))
@@ -33,18 +54,18 @@ def eval_metrics(actual, pred):
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(40)
+    mlflow.set_tracking_uri("http://localhost:5000")
 
     # Read the wine-quality csv file from the URL
-    #csv_url = (
-    #    "http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
-    #)
-    #try:
-    #    data = pd.read_csv(csv_url, sep=";")
-    #except Exception as e:
-    #    logger.exception(
-    #        "Unable to download training & test CSV, check your internet connection. Error: %s", e
-    #    )
-    data = pd.read_csv('winequality-red.csv', sep=";")
+    csv_url = (
+        "http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
+    )
+    try:
+        data = pd.read_csv(csv_url, sep=";")
+    except Exception as e:
+        logger.exception(
+            "Unable to download training & test CSV, check your internet connection. Error: %s", e
+        )
 
     # Split the data into training and test sets. (0.75, 0.25) split.
     train, test = train_test_split(data)
@@ -58,7 +79,15 @@ if __name__ == "__main__":
     alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.3
     l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.6
 
-    with mlflow.start_run():
+    experiment_id = get_or_create_experiment("Wine Quality")
+    run_name = "first attempt"
+
+    with mlflow.start_run(experiment_id=experiment_id, run_name=run_name, nested=True):
+        
+
+        # Set the current active MLflow experiment
+        mlflow.set_experiment(experiment_id=experiment_id)
+
         lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
         lr.fit(train_x, train_y)
 
@@ -86,6 +115,6 @@ if __name__ == "__main__":
             # There are other ways to use the Model Registry, which depends on the use case,
             # please refer to the doc for more information:
             # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-            mlflow.sklearn.log_model(lr, "model", registered_model_name="ElasticnetWineModel")
+            mlflow.sklearn.log_model(lr, "model", registered_model_name="ElasticnetWineModel", input_example=train_x.iloc[[0]])
         else:
-            mlflow.sklearn.log_model(lr, "model")
+            mlflow.sklearn.log_model(lr, "model", input_example=train_x.iloc[[0]])
