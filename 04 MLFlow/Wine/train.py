@@ -5,6 +5,7 @@
 #
 # Please notice!!!
 # Launch MLflow UI before executing this script
+# mlflow server --host 127.0.0.1 --port 8080
 
 import os
 import warnings
@@ -54,7 +55,7 @@ def eval_metrics(actual, pred):
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(40)
-    mlflow.set_tracking_uri("http://localhost:5000")
+    mlflow.set_tracking_uri("http://localhost:8080")
 
     # Read the wine-quality csv file from the URL
     csv_url = (
